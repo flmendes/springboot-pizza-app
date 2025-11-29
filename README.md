@@ -249,3 +249,5 @@ Desenvolvido com ❤️ usando Spring Boot 4 e Java 21
 ---
 
 **Pronto para começar?** Leia [Quick Start](docs/guides/QUICK_START.md) ou [Setup & Tests](docs/guides/SETUP_AND_TESTS.md)
+
+<!-- PR: atualização da seção 'Exemplo de Uso' conforme ADR-009 (API Versioning). -->
