@@ -100,7 +100,13 @@ Cada slice é independente e autossuficiente, contendo todas as camadas necessá
 
 ## 🌐 Exemplo de Uso
 
-### Criar Order
+Abaixo estão exemplos práticos dos endpoints e do fluxo de pedidos utilizados nos testes de integração (`OrderControllerIntegrationTest`). Em produção as rotas são prefixadas com `/api` (ex.: `/api/orders`) e o versionamento pode ser controlado via header `X-Version` conforme ADR-009.
+
+### 1) Criar um pedido
+
+Endpoint: POST /api/orders
+
+Request (JSON):
 
 ```bash
 curl -X POST http://localhost:8080/api/orders \
@@ -108,45 +114,116 @@ curl -X POST http://localhost:8080/api/orders \
   -d '{
     "customerId": 1,
     "items": [
-      {"pizzaId": 1, "quantity": 2, "unitPrice": 45.00}
-    ]
+      {"pizzaId": 1, "quantity": 2},
+      {"pizzaId": 2, "quantity": 1}
+    ],
+    "notes": "Sem cebola na primeira pizza"
   }' | jq
 ```
 
-# Observação sobre versionamento
-A API utiliza o suporte nativo de versionamento do Spring (Spring Framework 7.0.1+):
-- As rotas não contêm a versão na URL (por exemplo `GET /api/pizzas`).
-- Os endpoints declaram sua versão via anotação (ex: `@GetMapping(version = "1")`).
-- A versão padrão é configurada como `1` (veja `application.properties`).
-- Para requisitar uma versão específica você pode enviar o header `X-Version`.
-
-**Exemplo (usar versão 2):**
-
-```bash
-curl -H "X-Version: 2" -X GET http://localhost:8080/api/pizzas | jq
-```
-
-**Response (RFC 9457 compliant):**
+Response (201 Created - exemplo):
 
 ```json
-HTTP/1.1 201 Created
-Content-Type: application/json
-
 {
   "id": 1,
   "customerId": 1,
   "status": "PENDING",
-  "totalAmount": 90.00,
+  "totalAmount": 140.00,
   "items": [
-    {
-      "pizzaId": 1,
-      "pizzaName": "Margherita",
-      "quantity": 2,
-      "unitPrice": 45.00,
-      "totalPrice": 90.00
-    }
+    {"pizzaId": 1, "pizzaName": "Margherita", "quantity": 2, "unitPrice": 45.00, "totalPrice": 90.00},
+    {"pizzaId": 2, "pizzaName": "Pepperoni", "quantity": 1, "unitPrice": 50.00, "totalPrice": 50.00}
   ],
+  "notes": "Sem cebola na primeira pizza",
   "createdAt": "2024-11-28T10:30:00"
+}
+```
+
+> Observação: nos testes de integração (MockMvc) usamos `/orders` pois o MockMvc não aplica o context-path; em execução normal do aplicativo o caminho completo é `/api/orders`.
+
+### 2) Confirmar pedido (PENDING -> CONFIRMED)
+
+Endpoint: PUT /api/orders/{id}/confirm
+
+```bash
+curl -X PUT http://localhost:8080/api/orders/1/confirm -H "Content-Type: application/json" | jq
+```
+
+Exemplo de resposta (200 OK):
+```json
+{ "id": 1, "status": "CONFIRMED", ... }
+```
+
+### 3) Fluxo completo de status (exemplos)
+
+- Iniciar preparo (CONFIRMED -> PREPARING):
+  PUT /api/orders/{id}/start-preparing
+
+- Marcar pronto (PREPARING -> READY):
+  PUT /api/orders/{id}/mark-ready
+
+- Marcar em entrega (READY -> IN_DELIVERY):
+  PUT /api/orders/{id}/mark-in-delivery
+
+- Marcar entregue (IN_DELIVERY -> DELIVERED):
+  PUT /api/orders/{id}/mark-delivered
+
+- Cancelar (qualquer estado permitido pela máquina de estados):
+  PUT /api/orders/{id}/cancel
+
+Exemplo (sequência):
+
+```bash
+curl -X PUT http://localhost:8080/api/orders/1/start-preparing
+curl -X PUT http://localhost:8080/api/orders/1/mark-ready
+curl -X PUT http://localhost:8080/api/orders/1/mark-in-delivery
+curl -X PUT http://localhost:8080/api/orders/1/mark-delivered
+```
+
+Cada chamada retorna o `OrderResponse` atualizado (com o novo `status`).
+
+### 4) Consultas
+
+- Listar todos os pedidos: GET /api/orders
+
+```bash
+curl http://localhost:8080/api/orders | jq
+```
+
+- Buscar por cliente: GET /api/orders/customer/{customerId}
+
+```bash
+curl http://localhost:8080/api/orders/customer/1 | jq
+```
+
+- Buscar por status: GET /api/orders/status/{status}
+
+```bash
+curl http://localhost:8080/api/orders/status/CONFIRMED | jq
+```
+
+### 5) Validações e erros (RFC 9457)
+
+Erros de validação e recursos não encontrados seguem o formato Problem Details (RFC 9457). Exemplos:
+
+- Pedido sem itens (400 Bad Request):
+```json
+{
+  "type": "https://api.example.com/problems/invalid-request",
+  "title": "Invalid Request",
+  "status": 400,
+  "detail": "Order must have at least one item",
+  "timestamp": "2024-11-28T10:30:00"
+}
+```
+
+- Pizza não encontrada (404 Not Found):
+```json
+{
+  "type": "https://api.example.com/problems/resource-not-found",
+  "title": "Resource Not Found",
+  "status": 404,
+  "detail": "Pizza not found with id: 999",
+  "timestamp": "2024-11-28T10:30:00"
 }
 ```
 
