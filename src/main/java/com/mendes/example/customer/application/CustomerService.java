@@ -51,19 +51,6 @@ public class CustomerService {
         return customerMapper.toResponse(customer);
     }
 
-    /**
-     * Recupera um cliente pelo e-mail.
-     *
-     * @throws ResourceNotFoundException caso o cliente não seja encontrado
-     */
-    @Transactional(readOnly = true)
-    public CustomerResponse getCustomerByEmail(String email) {
-        Customer customer = customerRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                    "Cliente não encontrado com o e-mail: " + email
-                ));
-        return customerMapper.toResponse(customer);
-    }
 
     /**
      * Cria um novo cliente. Valida se o e-mail já está em uso.
