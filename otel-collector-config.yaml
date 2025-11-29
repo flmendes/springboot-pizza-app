@@ -1,0 +1,79 @@
+# OpenTelemetry Collector Configuration
+# Receives traces and metrics via OTLP and exports to Jaeger
+
+receivers:
+  # OTLP receiver for traces (gRPC and HTTP)
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+  # Prometheus receiver for metrics
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'pizza-backend'
+          static_configs:
+            - targets: ['app:8080']
+          metrics_path: '/actuator/prometheus'
+          scrape_interval: 5s
+
+processors:
+  # Batch processor for better performance
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+
+  # Memory limiter to prevent OOM
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+
+  # Attributes processor to add resource attributes
+  attributes:
+    actions:
+      - key: service.namespace
+        value: pizza-backend
+        action: insert
+
+exporters:
+  # OTLP exporter for traces to Jaeger
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+
+  # Prometheus exporter for metrics
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+
+  # Debug exporter for troubleshooting
+  debug:
+    verbosity: detailed
+
+# Extensions - consolidated section (no duplicates)
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+  pprof:
+    endpoint: 0.0.0.0:1777
+
+# Service configuration
+service:
+  extensions: [health_check, pprof]
+  pipelines:
+    # Traces pipeline: OTLP -> Batch -> Jaeger
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, attributes]
+      exporters: [otlp/jaeger, debug]
+
+    # Metrics pipeline: Prometheus -> Batch -> Prometheus
+    metrics:
+      receivers: [prometheus]
+      processors: [memory_limiter, batch]
+      exporters: [prometheus, debug]
+
+
