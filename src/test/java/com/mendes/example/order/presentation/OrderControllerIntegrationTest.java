@@ -24,8 +24,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -142,7 +144,7 @@ class OrderControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.customerId").value(customer.getId()))
+                .andExpect(jsonPath("$.customerId").value(customer.getId().toString()))
                 .andExpect(jsonPath("$.status").value(OrderStatus.PENDING.toString()))
                 .andExpect(jsonPath("$.totalAmount").value(140.00))
                 .andExpect(jsonPath("$.items.length()").value(2))
@@ -183,7 +185,7 @@ class OrderControllerIntegrationTest {
                 .andExpect(status().isCreated());
 
         // Obter ID do pedido criado
-        Long orderId = orderRepository.findAll().get(0).getId();
+        UUID orderId = orderRepository.findAll().get(0).getId();
 
         // Act & Assert - Confirmar pedido
         mockMvc.perform(put("/orders/{id}/confirm", orderId)
@@ -216,7 +218,7 @@ class OrderControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value(OrderStatus.PENDING.toString()));
 
-        Long orderId = orderRepository.findAll().get(0).getId();
+        UUID orderId = orderRepository.findAll().get(0).getId();
 
         // Act & Assert - Fluxo completo de status
         // ADR-008: Order Status State Machine - Validar transições de estado
@@ -273,7 +275,7 @@ class OrderControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].customerId").value(customer.getId()));
+                .andExpect(jsonPath("$[0].customerId").value(customer.getId().toString()));
     }
 
     @Test
@@ -297,7 +299,7 @@ class OrderControllerIntegrationTest {
                 .content(createJson))
                 .andExpect(status().isCreated());
 
-        Long orderId = orderRepository.findAll().get(0).getId();
+        UUID orderId = orderRepository.findAll().get(0).getId();
 
         // Confirmar pedido para ter status CONFIRMED
         mockMvc.perform(put("/orders/{id}/confirm", orderId));
@@ -331,7 +333,7 @@ class OrderControllerIntegrationTest {
                 .content(createJson))
                 .andExpect(status().isCreated());
 
-        Long orderId = orderRepository.findAll().get(0).getId();
+        UUID orderId = orderRepository.findAll().get(0).getId();
 
         // Act & Assert
         mockMvc.perform(put("/orders/{id}/cancel", orderId)

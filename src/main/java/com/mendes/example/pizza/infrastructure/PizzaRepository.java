@@ -16,6 +16,7 @@ public interface PizzaRepository extends JpaRepository<Pizza, Long> {
      */
     List<Pizza> findByAvailableTrue();
 
+
     /**
      * Busca pizzas cujo nome contenha o termo informado (case-insensitive).
      */

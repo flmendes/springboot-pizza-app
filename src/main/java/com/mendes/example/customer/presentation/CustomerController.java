@@ -4,12 +4,12 @@ import com.mendes.example.customer.application.CustomerService;
 import com.mendes.example.customer.application.dto.CreateCustomerRequest;
 import com.mendes.example.customer.application.dto.CustomerResponse;
 import com.mendes.example.customer.application.dto.UpdateCustomerRequest;
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * Controller REST para gerenciar clientes.
@@ -37,17 +37,8 @@ public class CustomerController {
      * Recupera um cliente pelo identificador.
      */
     @GetMapping(path = "/{id}", version = "1")
-    public ResponseEntity<CustomerResponse> getCustomerById(@PathVariable Long id) {
+    public ResponseEntity<CustomerResponse> getCustomerById(@PathVariable UUID id) {
         CustomerResponse response = customerService.getCustomerById(id);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Recupera um cliente pelo e-mail.
-     */
-    @GetMapping(path = "/email/{email}", version = "1")
-    public ResponseEntity<CustomerResponse> getCustomerByEmail(@PathVariable String email) {
-        CustomerResponse response = customerService.getCustomerByEmail(email);
         return ResponseEntity.ok(response);
     }
 
@@ -55,7 +46,9 @@ public class CustomerController {
      * Cria um novo cliente.
      */
     @PostMapping(version = "1")
-    public ResponseEntity<CustomerResponse> createCustomer(@RequestBody CreateCustomerRequest request) {
+    public ResponseEntity<CustomerResponse> createCustomer(
+        @RequestBody CreateCustomerRequest request
+    ) {
         CustomerResponse response = customerService.createCustomer(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -65,8 +58,9 @@ public class CustomerController {
      */
     @PutMapping(path = "/{id}", version = "1")
     public ResponseEntity<CustomerResponse> updateCustomer(
-            @PathVariable Long id,
-            @RequestBody UpdateCustomerRequest request) {
+        @PathVariable UUID id,
+        @RequestBody UpdateCustomerRequest request
+    ) {
         CustomerResponse response = customerService.updateCustomer(id, request);
         return ResponseEntity.ok(response);
     }
@@ -75,7 +69,7 @@ public class CustomerController {
      * Exclui um cliente pelo identificador.
      */
     @DeleteMapping(path = "/{id}", version = "1")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteCustomer(@PathVariable UUID id) {
         customerService.deleteCustomer(id);
         return ResponseEntity.noContent().build();
     }

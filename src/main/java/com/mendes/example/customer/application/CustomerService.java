@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Serviço de aplicação responsável pelas regras de negócio e operações CRUD de clientes.
@@ -21,6 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional
 public class CustomerService {
+
+    public static final String CUSTOMER_NOT_FOUND = "Cliente não encontrado com o id: ";
 
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
@@ -40,10 +43,10 @@ public class CustomerService {
      * @throws ResourceNotFoundException caso o cliente não seja encontrado
      */
     @Transactional(readOnly = true)
-    public CustomerResponse getCustomerById(Long id) {
+    public CustomerResponse getCustomerById(UUID id) {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Cliente não encontrado com o id: " + id
+                    CUSTOMER_NOT_FOUND + id
                 ));
         return customerMapper.toResponse(customer);
     }
@@ -85,10 +88,10 @@ public class CustomerService {
      * @throws ResourceNotFoundException caso o cliente não seja encontrado
      * @throws InvalidOperationException caso o novo e-mail já esteja em uso por outro cliente
      */
-    public CustomerResponse updateCustomer(Long id, UpdateCustomerRequest request) {
+    public CustomerResponse updateCustomer(UUID id, UpdateCustomerRequest request) {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Cliente não encontrado com o id: " + id
+                    CUSTOMER_NOT_FOUND + id
                 ));
 
         if (!customer.getEmail().equals(request.getEmail()) &&
@@ -108,20 +111,20 @@ public class CustomerService {
      *
      * @throws ResourceNotFoundException caso o cliente não seja encontrado
      */
-    public void deleteCustomer(Long id) {
+    public void deleteCustomer(UUID id) {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Cliente não encontrado com o id: " + id
+                    CUSTOMER_NOT_FOUND + id
                 ));
         customerRepository.delete(customer);
     }
 
     // Método interno para uso do OrderService - retorna entidade
     @Transactional(readOnly = true)
-    public Customer getCustomerEntityById(Long id) {
+    public Customer getCustomerEntityById(UUID id) {
         return customerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Cliente não encontrado com o id: " + id
+                    CUSTOMER_NOT_FOUND + id
                 ));
     }
 }

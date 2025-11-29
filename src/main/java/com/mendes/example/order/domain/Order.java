@@ -1,16 +1,19 @@
 package com.mendes.example.order.domain;
 
+import com.mendes.example.customer.domain.Customer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "orders")
@@ -21,11 +24,12 @@ import java.util.List;
 public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-    @Column(name = "customer_id", nullable = false)
-    private Long customerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
 
     @Column(nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
@@ -62,7 +66,7 @@ public class Order {
     public void calculateTotalAmount() {
         totalAmount = items.stream()
                 .map(OrderItem::getTotalPrice)
-                .filter(price -> price != null)  // Filtrar nulls para segurança
+                .filter(Objects::nonNull)  // Filtrar nulls para segurança
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 

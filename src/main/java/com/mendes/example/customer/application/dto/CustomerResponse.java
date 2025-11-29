@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * DTO de resposta para operaçõe com Customer.
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class CustomerResponse {
-    private Long id;
+    private UUID id;
     private String name;
     private String email;
     private String phone;

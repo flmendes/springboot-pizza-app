@@ -1,9 +1,11 @@
 package com.mendes.example.order.application;
 
+import com.mendes.example.customer.application.CustomerService;
+import com.mendes.example.customer.domain.Customer;
 import com.mendes.example.order.application.dto.CreateOrderRequest;
 import com.mendes.example.order.application.dto.OrderItemRequest;
 import com.mendes.example.order.application.dto.OrderResponse;
-import com.mendes.example.order.application.mapper.OrderItemMapper;
+
 import com.mendes.example.order.application.mapper.OrderMapper;
 import com.mendes.example.order.domain.Order;
 import com.mendes.example.order.domain.OrderItem;
@@ -21,15 +23,18 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class OrderService {
 
+    public static final String ORDER_NOT_FOUND = "Order not found with id: ";
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final PizzaService pizzaService;
+    private final CustomerService customerService;
     private final OrderMapper orderMapper;
 
     @Transactional(readOnly = true)
@@ -39,16 +44,16 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public OrderResponse getOrderById(Long id) {
+    public OrderResponse getOrderById(UUID id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Order not found with id: " + id
+                    ORDER_NOT_FOUND + id
                 ));
         return orderMapper.toResponse(order);
     }
 
     @Transactional(readOnly = true)
-    public List<OrderResponse> getOrdersByCustomerId(Long customerId) {
+    public List<OrderResponse> getOrdersByCustomerId(UUID customerId) {
         List<Order> orders = orderRepository.findByCustomerId(customerId);
         return orderMapper.toResponseList(orders);
     }
@@ -66,8 +71,10 @@ public class OrderService {
             );
         }
 
+        Customer customer = customerService.getCustomerEntityById(request.getCustomerId());
+
         Order order = Order.builder()
-                .customerId(request.getCustomerId())
+                .customer(customer)
                 .notes(request.getNotes())
                 .build();
 
@@ -93,10 +100,10 @@ public class OrderService {
         return orderMapper.toResponse(savedOrder);
     }
 
-    public OrderResponse confirmOrder(Long orderId) {
+    public OrderResponse confirmOrder(UUID orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Order not found with id: " + orderId
+                    ORDER_NOT_FOUND + orderId
                 ));
 
         if (order.getStatus() != OrderStatus.PENDING) {
@@ -110,10 +117,10 @@ public class OrderService {
         return orderMapper.toResponse(savedOrder);
     }
 
-    public OrderResponse startPreparing(Long orderId) {
+    public OrderResponse startPreparing(UUID orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Order not found with id: " + orderId
+                    ORDER_NOT_FOUND + orderId
                 ));
 
         if (order.getStatus() != OrderStatus.CONFIRMED) {
@@ -127,10 +134,10 @@ public class OrderService {
         return orderMapper.toResponse(savedOrder);
     }
 
-    public OrderResponse markAsReady(Long orderId) {
+    public OrderResponse markAsReady(UUID orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Order not found with id: " + orderId
+                    ORDER_NOT_FOUND + orderId
                 ));
 
         if (order.getStatus() != OrderStatus.PREPARING) {
@@ -144,10 +151,10 @@ public class OrderService {
         return orderMapper.toResponse(savedOrder);
     }
 
-    public OrderResponse markAsInDelivery(Long orderId) {
+    public OrderResponse markAsInDelivery(UUID orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Order not found with id: " + orderId
+                    ORDER_NOT_FOUND + orderId
                 ));
 
         if (order.getStatus() != OrderStatus.READY) {
@@ -161,10 +168,10 @@ public class OrderService {
         return orderMapper.toResponse(savedOrder);
     }
 
-    public OrderResponse markAsDelivered(Long orderId) {
+    public OrderResponse markAsDelivered(UUID orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Order not found with id: " + orderId
+                    ORDER_NOT_FOUND + orderId
                 ));
 
         if (order.getStatus() != OrderStatus.IN_DELIVERY) {
@@ -178,10 +185,10 @@ public class OrderService {
         return orderMapper.toResponse(savedOrder);
     }
 
-    public OrderResponse cancelOrder(Long orderId) {
+    public OrderResponse cancelOrder(UUID orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Order not found with id: " + orderId
+                    ORDER_NOT_FOUND + orderId
                 ));
 
         if (order.getStatus() == OrderStatus.DELIVERED || order.getStatus() == OrderStatus.CANCELLED) {
@@ -195,10 +202,10 @@ public class OrderService {
         return orderMapper.toResponse(savedOrder);
     }
 
-    public void deleteOrder(Long orderId) {
+    public void deleteOrder(UUID orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Order not found with id: " + orderId
+                    ORDER_NOT_FOUND + orderId
                 ));
         orderRepository.delete(order);
     }

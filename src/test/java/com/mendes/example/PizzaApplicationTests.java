@@ -6,7 +6,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class Springboot4ExampleApplicationTests {
+class PizzaApplicationTests {
 
 	@Test
 	void contextLoads() {

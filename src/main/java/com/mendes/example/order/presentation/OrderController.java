@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 
 
 @RestController
@@ -29,13 +30,13 @@ public class OrderController {
     }
 
     @GetMapping(path = "/{id}", version = "1")
-    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> getOrderById(@PathVariable UUID id) {
         OrderResponse response = orderService.getOrderById(id);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping(path = "/customer/{customerId}", version = "1")
-    public ResponseEntity<List<OrderResponse>> getOrdersByCustomerId(@PathVariable Long customerId) {
+    public ResponseEntity<List<OrderResponse>> getOrdersByCustomerId(@PathVariable UUID customerId) {
         List<OrderResponse> responses = orderService.getOrdersByCustomerId(customerId);
         return ResponseEntity.ok(responses);
     }
@@ -53,43 +54,43 @@ public class OrderController {
     }
 
     @PutMapping(path = "/{id}/confirm", version = "1")
-    public ResponseEntity<OrderResponse> confirmOrder(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> confirmOrder(@PathVariable UUID id) {
         OrderResponse response = orderService.confirmOrder(id);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping(path = "/{id}/start-preparing", version = "1")
-    public ResponseEntity<OrderResponse> startPreparing(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> startPreparing(@PathVariable UUID id) {
         OrderResponse response = orderService.startPreparing(id);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping(path = "/{id}/mark-ready", version = "1")
-    public ResponseEntity<OrderResponse> markAsReady(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> markAsReady(@PathVariable UUID id) {
         OrderResponse response = orderService.markAsReady(id);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping(path = "/{id}/mark-in-delivery", version = "1")
-    public ResponseEntity<OrderResponse> markAsInDelivery(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> markAsInDelivery(@PathVariable UUID id) {
         OrderResponse response = orderService.markAsInDelivery(id);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping(path = "/{id}/mark-delivered", version = "1")
-    public ResponseEntity<OrderResponse> markAsDelivered(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> markAsDelivered(@PathVariable UUID id) {
         OrderResponse response = orderService.markAsDelivered(id);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping(path = "/{id}/cancel", version = "1")
-    public ResponseEntity<OrderResponse> cancelOrder(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> cancelOrder(@PathVariable UUID id) {
         OrderResponse response = orderService.cancelOrder(id);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping(path = "/{id}", version = "1")
-    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteOrder(@PathVariable UUID id) {
         orderService.deleteOrder(id);
         return ResponseEntity.noContent().build();
     }

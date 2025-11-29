@@ -7,13 +7,14 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class OrderItemResponse {
-    private Long id;
+    private UUID id;
     private Long pizzaId;
     private String pizzaName;
     private Integer quantity;
