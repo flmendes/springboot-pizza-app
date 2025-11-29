@@ -130,11 +130,28 @@ Response (201 Created - exemplo):
   "status": "PENDING",
   "totalAmount": 140.00,
   "items": [
-    {"pizzaId": 1, "pizzaName": "Margherita", "quantity": 2, "unitPrice": 45.00, "totalPrice": 90.00},
-    {"pizzaId": 2, "pizzaName": "Pepperoni", "quantity": 1, "unitPrice": 50.00, "totalPrice": 50.00}
+    {
+      "id": 1,
+      "pizzaId": 1,
+      "pizzaName": "Margherita",
+      "quantity": 2,
+      "unitPrice": 45.00,
+      "totalPrice": 90.00,
+      "createdAt": "2024-11-28T10:30:00"
+    },
+    {
+      "id": 2,
+      "pizzaId": 2,
+      "pizzaName": "Pepperoni",
+      "quantity": 1,
+      "unitPrice": 50.00,
+      "totalPrice": 50.00,
+      "createdAt": "2024-11-28T10:30:00"
+    }
   ],
   "notes": "Sem cebola na primeira pizza",
-  "createdAt": "2024-11-28T10:30:00"
+  "createdAt": "2024-11-28T10:30:00",
+  "updatedAt": "2024-11-28T10:30:00"
 }
 ```
 
@@ -154,6 +171,8 @@ Exemplo de resposta (200 OK):
 ```
 
 ### 3) Fluxo completo de status (exemplos)
+
+Seguindo a máquina de estados (ADR-008):
 
 - Iniciar preparo (CONFIRMED -> PREPARING):
   PUT /api/orders/{id}/start-preparing
