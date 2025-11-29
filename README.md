@@ -25,7 +25,12 @@ Uma aplicação backend robusta para gerenciar pedidos de pizzas, desenvolvida c
 
 ```bash
 docker-compose up --build
-curl http://localhost:8080/api/v1/pizzas | jq
+# A API usa versionamento via annotations do Spring (default = 1). Portanto a chamada abaixo
+# acessa a versão 1 por padrão.
+curl http://localhost:8080/api/pizzas | jq
+
+# Para solicitar uma versão específica via header:
+# curl -H "X-Version: 2" http://localhost:8080/api/pizzas | jq
 ```
 
 ### Localmente
@@ -98,7 +103,7 @@ Cada slice é independente e autossuficiente, contendo todas as camadas necessá
 ### Criar Order
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/orders \
+curl -X POST http://localhost:8080/api/orders \
   -H "Content-Type: application/json" \
   -d '{
     "customerId": 1,
@@ -106,6 +111,19 @@ curl -X POST http://localhost:8080/api/v1/orders \
       {"pizzaId": 1, "quantity": 2, "unitPrice": 45.00}
     ]
   }' | jq
+```
+
+# Observação sobre versionamento
+A API utiliza o suporte nativo de versionamento do Spring (Spring Framework 7.0.1+):
+- As rotas não contêm a versão na URL (por exemplo `GET /api/pizzas`).
+- Os endpoints declaram sua versão via anotação (ex: `@GetMapping(version = "1")`).
+- A versão padrão é configurada como `1` (veja `application.properties`).
+- Para requisitar uma versão específica você pode enviar o header `X-Version`.
+
+**Exemplo (usar versão 2):**
+
+```bash
+curl -H "X-Version: 2" -X GET http://localhost:8080/api/pizzas | jq
 ```
 
 **Response (RFC 9457 compliant):**
@@ -231,4 +249,3 @@ Desenvolvido com ❤️ usando Spring Boot 4 e Java 21
 ---
 
 **Pronto para começar?** Leia [Quick Start](docs/guides/QUICK_START.md) ou [Setup & Tests](docs/guides/SETUP_AND_TESTS.md)
-
