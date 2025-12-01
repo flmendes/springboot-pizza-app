@@ -1,0 +1,40 @@
+# Stage 1: Build Native Image
+# Usamos a imagem oficial da comunidade GraalVM para Java 21
+FROM ghcr.io/graalvm/native-image-community:21 AS builder
+
+WORKDIR /app
+
+# Copia os arquivos de configuração do Maven wrapper e fonte
+COPY .mvn/ .mvn/
+COPY mvnw pom.xml ./
+COPY src ./src
+
+# Garante permissão de execução no wrapper
+RUN chmod +x mvnw
+
+# Compila a imagem nativa
+# -Pnative: Ativa o perfil nativo do Spring Boot
+# native:compile: Executa a compilação AOT (Ahead-of-Time)
+# -DskipTests: Pula testes para agilizar o build
+RUN ./mvnw -Pnative native:compile -DskipTests
+
+# Stage 2: Runtime
+# Usamos distroless base (contém glibc, openssl, etc) necessária para binários dinâmicos
+FROM gcr.io/distroless/base-debian12:nonroot
+
+WORKDIR /app
+
+# Copia o binário gerado (o nome padrão é o artifactId do pom.xml)
+COPY --from=builder /app/target/pizza-app .
+
+# Expõe a porta
+EXPOSE 8080
+
+# Variáveis de ambiente
+ENV SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/pizza_db
+ENV SPRING_DATASOURCE_USERNAME=postgres
+ENV SPRING_DATASOURCE_PASSWORD=postgres
+ENV SPRING_JPA_HIBERNATE_DDL_AUTO=create-drop
+
+# Executa o binário nativo
+ENTRYPOINT ["./pizza-app"]

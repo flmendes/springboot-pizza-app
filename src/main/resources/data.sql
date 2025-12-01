@@ -10,3 +10,9 @@ VALUES
 ('Frango com Catupiry', 'Frango desfiado com molho de catupiry cremoso', 52.00, 'MEDIUM', true, NOW(), NOW()),
 ('Portuguesa', 'Presunto, ovo, azeitona, cebola, pimentão e tomate', 48.00, 'MEDIUM', true, NOW(), NOW());
 
+-- Customer Data for Testing
+INSERT INTO customer (id, name, email, phone, address, zip_code, city, state, created_at, updated_at)
+VALUES
+    ('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380b01', 'João Silva', 'joao@example.com', '11999999999', 'Rua Teste, 123', '01234-567', 'São Paulo', 'SP', NOW(), NOW()),
+    ('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380b02', 'Maria Santos', 'maria@example.com', '11988888888', 'Av. Principal, 456', '02345-678', 'São Paulo', 'SP', NOW(), NOW());
+
