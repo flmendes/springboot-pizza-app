@@ -19,7 +19,7 @@ WORKDIR /app
 # java.desktop é necessário para AWT/Beans (comum em libs de imagem ou processamento de beans)
 # jdk.unsupported é necessário para frameworks que usam Unsafe (como Netty/Spring)
 RUN $JAVA_HOME/bin/jlink \
-    --add-modules java.base,java.logging,java.naming,java.desktop,java.management,java.security.jgss,java.instrument,java.sql,jdk.unsupported,java.rmi,java.xml,jdk.crypto.ec,java.net.http,jdk.management \
+    --add-modules java.base,java.compiler,java.scripting,java.logging,java.naming,java.desktop,java.management,java.security.jgss,java.instrument,java.sql,jdk.unsupported,java.rmi,java.xml,jdk.crypto.ec,java.net.http,jdk.management \
     --strip-debug \
     --no-man-pages \
     --no-header-files \
